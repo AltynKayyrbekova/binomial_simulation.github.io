@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Биномиальное распределение</title>
+    <link rel="stylesheet" href="style12.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+</head>
+
+<body>
+    <header>
+        <h1>Биномиальное распределение</h1>
+    </header>
+    <div class="container">
+
+        <section id="simulation-section">
+            <div role="button" onclick="toggleExampleText()" style="color: rgb(139, 139, 255);">Пример задачи</div>
+            <div id="example-text" style="display: none;">
+                "Предположим, у нас есть монета, которая выпадает орлом с вероятностью успеха \( p=0.5 \).
+                Мы выполняем 10 подбрасываний монеты (\( n=10 \)). Какова вероятность получить ровно 7 орлов?".
+                Чтобы решить эту задачу, вам нужно ввести значения параметров \( n \) и \( p \)
+                в соответствующие поля и нажать кнопку "Сгенерировать". Иллюстратор отобразит график биномиального
+                распределения и численные значения математического ожидания (\( M(X) \)) и дисперсии (\( D(X) \)) и таблицу распределения, 
+                где в соответствующем поле найдете вероятность выпадения 7.
+            </div>
+
+            <form id="binomial-form">
+                <label for="n">Количество опытов (\( n \)<=170):</label>
+                <p></p>
+                <input type="number" id="n" name="n" required min="1">
+                <p></p>
+                <label for="p">Вероятность успеха в каждом опыте (0<\( p \)<1):</label>
+                <p></p>
+                <input type="number" step="0.01" id="p" name="p" min="0" max="1" required>
+
+                <p></p>
+                <button type="button" onclick="generateBinomial()">Старт</button>
+            </form>
+
+            <canvas id="binomial-chart"></canvas>
+
+            <div id="output">
+                <h2>Численные характеристики:</h2>
+                <p></p>
+                <p id="output-mean"> Математическое ожидание (Mean ): \(M(X)\) = <span class="math"></span></p>
+                <p></p>
+                <p id="output-variance"> Дисперсия (Variance): \(D(X)\) = <span class="math"></span></p>
+            </div>
+
+            <div role="button" onclick="toggleExplanation()" style="color: rgb(139, 139, 255)">Объяснение</div>
+            <div id="explanation" style="display: none;">
+                <p>Вероятность события, где случайная величина \(X\) примет значение \(k\) вычисляется по формуле:</p>
+                \[ P(X = k) = \binom{n}{k} \cdot p^k \cdot (1 - p)^{n - k},\]
+                <p>где:</p>
+                <ul>
+                    <li> \( \binom{n}{k} \) - число сочетаний \(n\) по \(k\),</li>
+                    <li> \( p \) - вероятность успеха в каждом опыте,</li>
+                    <li> \( (1 - p) \) - вероятность неудачи в каждом опыте.</li>
+                </ul>
+                <p>Число сочетаний \( \binom{n}{k} \) вычисляется по формуле:</p>
+                \[ \binom{n}{k} = \frac{n!}{k! \cdot (n - k)!} ,\]
+                
+                <p>где факториал вычисляется по формуле:</p>
+                \[ k! = 1 \cdot 2 \cdot 3 \cdot ... \cdot k. \]
+
+                <p>Математическое ожидание и дисперсия распределения вычисляются следующим образом:</p>
+                \[ M(X) = n \cdot p \]
+                \[ D(X) = n \cdot p \cdot (1 - p) \]
+            </div>
+        </section>
+
+        <section id="distribution-table-section" style=" width: 40%; display: none;">
+            <div class="distribution-table-container">
+                <label for="decimal-places">Количество знаков после запятой:</label>
+                <input class="decimal" type="number" id="decimal-places" min="0" onchange="updateDecimalPlaces()">
+                <table id="distribution-table-content">
+                    <thead>
+                        <tr>
+                            <th>k</th>
+                            <th>\(P(X=k)\)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="distribution-table-body"></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+    
+    <script>
+        function toggleExampleText() {
+            const exampleText = document.getElementById('example-text');
+            exampleText.style.display = (exampleText.style.display === 'none' || exampleText.style.display === '') ? 'block' : 'none';
+        }
+
+        function toggleExplanation() {
+            const explanation = document.getElementById('explanation');
+            explanation.style.display = (explanation.style.display === 'none' || explanation.style.display === '') ? 'block' : 'none';
+        }
+
+        function generateBinomial() {
+            const nInput = document.getElementById('n');
+            const pInput = document.getElementById('p');
+            const outputContainer = document.getElementById('output');
+            const distributionTableSection = document.getElementById('distribution-table-section');
+
+            const n = parseInt(nInput.value);
+            const p = parseFloat(pInput.value);
+
+            // Validation check
+            if (
+                isNaN(n) || isNaN(p) ||
+                n <= 0 || p < 0 || p > 1
+            ) {
+                alert('Пожалуйста, введите корректные значения. Please enter valid values.');
+                return;
+            }
+
+            const data = calculateBinomialDistribution(n, p);
+            updateChart(data, n);
+            updateOutput(n, p);
+            updateDistributionTable(data);
+
+            outputContainer.style.display = 'block';
+            distributionTableSection.style.display = 'block';
+        }
+
+        function calculateBinomialDistribution(n, p) {
+            const data = [];
+            let mean = 0;
+            let variance = 0;
+            const decimalPlaces = getDecimalPlaces();
+
+            for (let i = 0; i <= n; i++) {
+                const probability = binomialProbability(i, n, p);
+                data.push({
+                    x: i,
+                    y: probability
+                });
+
+                mean += i * probability;
+                variance += i * i * probability;
+            }
+
+            variance -= mean * mean;
+
+            return data;
+        }
+
+        function updateDistributionTable(data) {
+            const tableBody = document.getElementById('distribution-table-body');
+            tableBody.innerHTML = '';
+            const decimalPlaces = getDecimalPlaces();
+
+            data.forEach(entry => {
+                const row = document.createElement('tr');
+                const xCell = document.createElement('td');
+                const probabilityCell = document.createElement('td');
+
+                xCell.textContent = entry.x;
+                probabilityCell.textContent = entry.y.toFixed(decimalPlaces);
+
+                row.appendChild(xCell);
+                row.appendChild(probabilityCell);
+
+                tableBody.appendChild(row);
+            });
+        }
+
+        function updateChart(data, n) {
+            const ctx = document.getElementById('binomial-chart').getContext('2d');
+            if (window.myBinomialChart) {
+                window.myBinomialChart.destroy();
+            }
+
+            const chartType = 'line';
+
+            const maxProbability = Math.max(...data.map(entry => entry.y));
+            const yAxisMax = Math.min(maxProbability + 0.01, 1);
+
+            const decimalPlaces = getDecimalPlaces();
+            const stepSize = 1 / Math.pow(10, decimalPlaces);
+
+            window.myBinomialChart = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: Array.from({ length: data.length }, (_, i) => i.toString()),
+                    datasets: [{
+                        label: 'Probability',
+                        data: data.map(entry => entry.y),
+                        backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                        borderColor: 'rgba(52, 152, 219, 1)',
+                        borderWidth: 1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            max: n
+                        },
+                        y: {
+                            min: 0,
+                            max: yAxisMax,
+                            ticks: {
+                                stepSize: stepSize,
+                                beginAtZero: true
+                            }
+                        }
+                    },
+                    animation: {
+                        onProgress: (animation) => {
+                            const ctx = animation.chart.ctx;
+                            const xAxis = animation.chart.scales['x'];
+                            const yAxis = animation.chart.scales['y'];
+
+                            data.forEach(entry => {
+                                const progress = animation.currentStep / animation.numSteps;
+                                const y = yAxis.getPixelForValue(entry.y * progress);
+                                const x = xAxis.getPixelForValue(entry.x);
+
+                                ctx.beginPath();
+                                ctx.strokeStyle = 'rgba(52, 152, 219, 0.7)';
+                                ctx.lineWidth = 1;
+                                ctx.moveTo(x, yAxis.bottom);
+                                ctx.lineTo(x, y);
+                                ctx.stroke();
+                            });
+                        }
+                    }
+                }
+            });
+        }
+
+
+        function updateOutput(n, p) {
+            const outputContainer = document.getElementById('output');
+            const meanElement = outputContainer.querySelector('#output-mean span.math');
+            const varianceElement = outputContainer.querySelector('#output-variance span.math');
+            const decimalPlaces = getDecimalPlaces();
+
+            const mean = (n * p).toFixed(decimalPlaces);
+            const variance = (n * p * (1 - p)).toFixed(decimalPlaces);
+
+            meanElement.textContent = mean;
+            varianceElement.textContent = variance;
+        }
+
+        function binomialProbability(x, n, p) {
+            const q = 1 - p;
+            let result = binomialCoefficient(n, x) * (p ** x) * (q ** (n - x));
+            return result;
+        }
+
+        function binomialCoefficient(n, x) {
+            return factorial(n) / (factorial(x) * factorial(n - x));
+        }
+
+        function factorial(n) {
+            if (n === 0 || n === 1) {
+                return 1;
+            } else {
+                return n * factorial(n - 1);
+            }
+        }
+
+        function getDecimalPlaces() {
+            const decimalPlacesInput = document.getElementById('decimal-places');
+            return parseInt(decimalPlacesInput.value) || 4; // 
+        }
+
+        function updateDecimalPlaces() {
+            updateDistributionTable(calculateBinomialDistribution(parseInt(document.getElementById('n').value), parseFloat(document.getElementById('p').value)));
+        }
+    </script>
+</body>
+
+</html>
