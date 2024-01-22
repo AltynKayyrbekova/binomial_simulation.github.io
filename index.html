@@ -216,36 +216,6 @@
                                 beginAtZero: true
                             }
                         }
-                    },
-                    animation: {
-                        animateScale: false,
-                        animateRotate: false,
-                        onProgress: (animation) => {
-                            if (!animationStarted) {
-                                animationStarted = true; // Устанавливаем флаг, что анимация началась
-                                return;
-                            }
-
-                            const ctx = animation.chart.ctx;
-                            const xAxis = animation.chart.scales['x'];
-                            const yAxis = animation.chart.scales['y'];
-
-                            data.forEach(entry => {
-                                const progress = animation.currentStep / animation.numSteps;
-                                const y = yAxis.getPixelForValue(entry.y * progress);
-                                const x = xAxis.getPixelForValue(entry.x);
-
-                                ctx.beginPath();
-                                ctx.strokeStyle = 'rgba(52, 152, 219, 0.7)';
-                                ctx.lineWidth = 1;
-                                ctx.moveTo(x, yAxis.bottom);
-                                ctx.lineTo(x, y);
-                                ctx.stroke();
-                            });
-                        }
-                    },
-                    hover: {
-                        mode: null // Отключаем анимацию при наведении на точки
                     }
                 }
             });
