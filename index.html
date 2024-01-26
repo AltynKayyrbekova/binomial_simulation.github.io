@@ -176,7 +176,7 @@
                 const probabilityCell = document.createElement('td');
 
                 xCell.textContent = entry.x;
-                probabilityCell.textContent = entry.y.toFixed(decimalPlaces);
+                probabilityCell.textContent = entry.y.toExponential(decimalPlaces);
 
                 row.appendChild(xCell);
                 row.appendChild(probabilityCell);
