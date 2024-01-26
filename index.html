@@ -217,15 +217,16 @@
                             min: 0,
                             type: 'linear',
                             position: 'bottom',
-                            max: n
+                            max: n,
+                            beginAtZero: true
                         },
                         y: {
                             min: 0,
                             max: yAxisMax,
                             ticks: {
-                                stepSize: stepSize,
-                                beginAtZero: true
-                            }
+                                stepSize: stepSize
+                            },
+                            beginAtZero: true
                         }
                     },
                     plugins: {
