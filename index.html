@@ -69,14 +69,14 @@
             <div id="explanation" style="display: none;">
                 <p>Вероятность события, что случайная величина \(X\) примет значение \(k\) вычисляется по формуле:</p>
                 \[ P(X = k) = \binom{n}{k} \cdot p^k \cdot (1 - p)^{n - k},\]
-                <p>где:</p>
+                <p>где</p>
                 <ul>
                     <li> \( \binom{n}{k} \) - число сочетаний из \(n\) по \(k\),</li>
                     <li> \( p \) - вероятность успеха в каждом опыте,</li>
                     <li> \( (1 - p) \) - вероятность неудачи в каждом опыте.</li>
                 </ul>
                 
-                \[ \binom{n}{k} = \frac{n!}{k! \cdot (n - k)!} ,\]
+                \[ \binom{n}{k} = \frac{n!}{k! \cdot (n - k)!},\]
                 
                 \[ k! = 1 \cdot 2 \cdot 3 \cdot ... \cdot k. \]
                 
@@ -90,7 +90,7 @@
                 <table id="distribution-table-content">
                     <thead>
                         <tr>
-                            <th>k</th>
+                            <th>\(k\)</th>
                             <th>\(P(X=k)\)</th>
                         </tr>
                     </thead>
@@ -214,6 +214,7 @@
                 options: {
                     scales: {
                         x: {
+                            min: 0,
                             type: 'linear',
                             position: 'bottom',
                             max: n
@@ -231,8 +232,7 @@
                         zoom: {
                             pan: {
                                 enabled: true,
-                                mode: 'xy',
-                                OverScaleMode: 'xy'
+                                mode: 'xy'
                             },
                             zoom: {
                                 wheel: {
