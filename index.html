@@ -201,7 +201,8 @@
             window.myBinomialChart = new Chart(ctx, {
                 type: chartType,
                 data: {
-                    labels: Array.from({ length: data.length }, (_, i) => i.toString()),
+                    labels: Array.from({ length: data.length }, (_, i) => (i + 1).toString()),
+
                     datasets: [{
                         label: 'Probability',
                         data: data.map(entry => entry.y),
