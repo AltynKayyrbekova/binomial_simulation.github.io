@@ -190,7 +190,7 @@
                 window.myBinomialChart.destroy();
             }
 
-            const chartType = 'bar';
+            const chartType = 'scatter';
 
             const maxProbability = Math.max(...data.map(entry => entry.y));
             const yAxisMax = Math.min(maxProbability + 0.01, 1);
@@ -205,10 +205,8 @@
                     datasets: [{
                         label: 'Probability',
                         data: data.map(entry => entry.y),
-                        backgroundColor: 'rgba(52, 152, 219, 0.7)',
-                        borderColor: 'rgba(52, 152, 219, 1)',
-                        borderWidth: 1,
-                        fill: false
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
                     }]
                 },
                 options: {
@@ -225,7 +223,7 @@
                         },
                         y: {
                             min: 0,
-                            max: 1,
+                            max: yAxisMax,
                             ticks: {
                                 stepSize: stepSize,
                                 min: 0
@@ -253,6 +251,16 @@
                     barPercentage: 0.1
                         
                 }
+            });
+            window.myPoissonChart.data.datasets.push({
+                type: 'bar',
+                label: 'Вероятность',
+                data: data,
+                backgroundColor: 'rgba(255, 99, 132, 1)', // цвет столбцов
+                borderColor: 'rgba(255, 99, 132, 1)', // цвет границы столбцов
+                borderWidth: 1,
+                barPercentage: 0.01, 
+                
             });
         }
 
